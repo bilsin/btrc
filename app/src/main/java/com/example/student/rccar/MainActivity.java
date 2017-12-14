@@ -12,9 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
+
+import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +29,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 2;
 
     private Button btnConnect;
+
+    private Button btnTest;
+
+    private TextView textView;
 
     private BluetoothService btService = null;
 
@@ -58,6 +65,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        // 테스트 전송
+        btnTest = (Button) findViewById(R.id.btn_test);
+        btnTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                btService.write("AT+BAUD04".getBytes());
+            }
+        });
+
+        textView = (TextView) findViewById(R.id.textView);
 
         checkDangerousPermission();
     }

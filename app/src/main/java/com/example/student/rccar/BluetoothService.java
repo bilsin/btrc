@@ -27,7 +27,7 @@ public class BluetoothService {
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
-    // RFCOMM Protocol
+    // RFCOMM Protocol, 시리얼 통신
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
@@ -51,7 +51,6 @@ public class BluetoothService {
      *
      */
     private Handler mHandler;
-
 
     /**
      *
@@ -182,8 +181,8 @@ public class BluetoothService {
     }
 
     /**
-     *  ConnectThread 초기화 device의 모든 연결 제거
-     *  새로운 연결 시작
+     * ConnectThread 초기화 device의 모든 연결 제거
+     * 새로운 연결 시작
      */
     public synchronized void connect(BluetoothDevice device) {
         Log.d(TAG, "connect to: " + device);
@@ -214,7 +213,7 @@ public class BluetoothService {
     }
 
     // ConnectedThread 초기화
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
+    public synchronized void connected(BluetoothSocket socket, final BluetoothDevice device) {
         Log.d(TAG, "connected");
 
         // Cancel the thread that completed the connection
@@ -238,7 +237,7 @@ public class BluetoothService {
         mConnectedThread.start();
 
         setState(STATE_CONNECTED);
-        Toast.makeText(mActivity, device.getName() + " 연결 완료", Toast.LENGTH_SHORT).show();
+        showToast(device.getName() + " 연결 완료");
     }
 
     // 모든 thread stop
@@ -265,7 +264,9 @@ public class BluetoothService {
             if (mState != STATE_CONNECTED)
                 return;
             r = mConnectedThread;
-        } // Perform the write unsynchronized r.write(out); }
+            //} // Perform the write unsynchronized r.write(out); }
+            r.write(out);
+        }
     }
 
     // 연결 실패했을때
@@ -376,7 +377,8 @@ public class BluetoothService {
                 try {
                     // InputStream으로부터 값을 받는 읽는 부분(값을 받는다)
                     bytes = mmInStream.read(buffer);
-
+                    Log.d(TAG, "" + bytes);
+                    showToast(String.valueOf(bytes));
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -407,5 +409,19 @@ public class BluetoothService {
                 Log.e(TAG, "close() of connect socket failed", e);
             }
         }
+    }
+
+    /**
+     * Thread 안에서 Toast 띄우기
+     *
+     * @param msg 보여줄 내용
+     */
+    public void showToast(final String msg) {
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
